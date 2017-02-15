@@ -9,7 +9,8 @@
 
 #define I2C_READ 1
 #define I2C_WRITE 0
-#define DELAY 4 // usec delay
+#define DELAY 5 // usec delay
+#define WRITE_DELAY 5 // usec write delay necessary for Teensy 3.2
 #define BUFFER_LENGTH 32
 
 class SlowSoftI2CMaster {

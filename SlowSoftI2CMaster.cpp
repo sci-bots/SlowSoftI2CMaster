@@ -57,19 +57,21 @@ void SlowSoftI2CMaster::i2c_stop(void) {
 // Return: true if the slave replies with an "acknowledge", false otherwise
 bool SlowSoftI2CMaster::i2c_write(uint8_t value) {
   for (uint8_t m = 0X80; m != 0; m >>= 1) {
+    delayMicroseconds(WRITE_DELAY); // #1
     digitalWrite(_sda, m & value);
     digitalWrite(_scl, HIGH);
     delayMicroseconds(DELAY);
     digitalWrite(_scl, LOW);
   }
+  delayMicroseconds(WRITE_DELAY); // #2
   // get Ack or Nak
   pinMode(_sda, INPUT);
-  digitalWrite(_sda, HIGH);
   digitalWrite(_scl, HIGH);
   uint8_t rtn = digitalRead(_sda);
+  delayMicroseconds(WRITE_DELAY); // *3
   digitalWrite(_scl, LOW);
-  pinMode(_sda, OUTPUT);
   digitalWrite(_sda, LOW);
+  pinMode(_sda, OUTPUT);
   return rtn == 0;
 }
 
@@ -77,14 +79,15 @@ bool SlowSoftI2CMaster::i2c_write(uint8_t value) {
 // the byte in order to terminate the read sequence. 
 uint8_t SlowSoftI2CMaster::i2c_read(bool last) {
   uint8_t b = 0;
-  digitalWrite(_sda, HIGH);
+  delayMicroseconds(DELAY);
   pinMode(_sda, INPUT);
   for (uint8_t i = 0; i < 8; i++) {
     b <<= 1;
-    delayMicroseconds(DELAY);
     digitalWrite(_scl, HIGH);
     if (digitalRead(_sda)) b |= 1;
+    delayMicroseconds(WRITE_DELAY); // #4
     digitalWrite(_scl, LOW);
+    delayMicroseconds(DELAY);
   }
   pinMode(_sda, OUTPUT);
   digitalWrite(_sda, last);
